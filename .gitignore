@@ -1,0 +1,57 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# Virtual environments
+.venv/
+venv/
+env/
+myenv/
+
+# Build/dist
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Notebooks
+.ipynb_checkpoints/
+
+# Editors/IDE
+.vscode/
+.idea/
+*.code-workspace
+
+# Logs
+*.log
+
+# Environment/Secrets
+.env
+.env.*
+config/config.py
+
+# Data (generated/large)
+data/raw/
+data/processed/
+
+# Models
+ml_pros_classifier.joblib
+models/*.joblib
+
+# Reports/exports
+PROJECT_DOCUMENTATION.pdf
+
+# Cache
+.cache/
+pytest_cache/
+
+# OS metadata
+Desktop.ini
+Icon?

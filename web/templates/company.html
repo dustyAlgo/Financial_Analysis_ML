@@ -1,0 +1,67 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ company[2] }} - Analysis{% endblock %}
+
+{% block content %}
+{% if show_insights %}
+<div class="card-box">
+  <h2 class="section-heading">Analysis</h2>
+  <p class="text-muted"># Analysis Generated Using ML</p>
+  <div class="row">
+    <div class="col-md-4">
+      <div class="border rounded p-3 mb-3">
+        <strong class="text-primary">Compounded Sales Growth</strong><br>
+        3 Years: {{ analysis[2] }}<br>
+        5 Years: —<br>
+        10 Years: —
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="border rounded p-3 mb-3">
+        <strong class="text-primary">Compounded Profit Growth</strong><br>
+        3 Years: {{ analysis[3] }}<br>
+        5 Years: —<br>
+        10 Years: —
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="border rounded p-3 mb-3">
+        <strong class="text-primary">Return on Equity</strong><br>
+        3 Years: {{ analysis[5] }}<br>
+        5 Years: —<br>
+        10 Years: —
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card-box">
+  <h3 class="section-heading">Pros and Cons</h3>
+  <p class="text-muted"><span class="dot"></span> Generated Using Machine Learning</p>
+  <div class="row">
+    <div class="col-md-6">
+      <div class="pros-box">
+        {% for pro in pros %}
+          <p>{{ pro }}</p>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="cons-box">
+        {% for con in cons %}
+          <p>{{ con }}</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% else %}
+<div class="alert alert-warning mt-4">
+  <h4 class="alert-heading">ML Insights Not Yet Available</h4>
+  <p>ML-generated insights will be displayed here after analyzing at least 100 companies.<br>
+  Currently analyzed: {{ processed_count }} companies.</p>
+</div>
+{% endif %}
+
+
+{% endblock %}
