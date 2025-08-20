@@ -2,7 +2,7 @@
 
 A comprehensive financial analysis system using Machine Learning to analyze public company financials. The system fetches financial data, applies ML algorithms, stores results in MySQL, and displays insights through a web interface.
 
-## 🚀 Quick Start
+##  Quick Start
 
 ### Prerequisites
 - Python 3.8+
@@ -41,7 +41,7 @@ A comprehensive financial analysis system using Machine Learning to analyze publ
    python main.py
    ```
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 financial-analysis-ml/
@@ -53,7 +53,7 @@ financial-analysis-ml/
 └── models/               # ML models
 ```
 
-## 🔧 Usage
+##  Usage
 
 ### Complete Pipeline
 ```bash
@@ -70,7 +70,7 @@ python main.py --web-only       # Web server only
 - Access: `http://localhost:5000`
 - ML insights visible after analyzing 100+ companies
 
-## 📊 Features
+## Features
 
 - **Data Fetching**: Automated API data retrieval
 - **ML Analysis**: Financial metrics classification
@@ -78,24 +78,11 @@ python main.py --web-only       # Web server only
 - **Web Interface**: Bootstrap-styled dashboard
 - **Insights**: Pros/cons analysis with ML
 
-## 📚 Documentation
-
-For detailed documentation, see `PROJECT_DOCUMENTATION.md`
-
 ## 🛠️ Troubleshooting
 
 - Check MySQL connection in `config/config.py`
 - Verify API key and network connectivity
 - Ensure all dependencies installed
 - Check console output for error messages
-
-## 🤝 Team Collaboration
-
-- Use feature branches for development
-- Update documentation with changes
-- Test components individually
-- Review code before merging
-
----
 
 **Version**: 1.0 | **Last Updated**: December 2024 
