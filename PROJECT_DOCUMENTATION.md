@@ -293,36 +293,10 @@ python scripts/store_results.py
 3. **Cloud Integration**: AWS/Azure deployment
 4. **Monitoring**: Application performance monitoring
 
-## Team Collaboration
-
 ### Development Workflow
 1. **Feature Branches**: Create for new features
 2. **Code Review**: Peer review before merging
 3. **Testing**: Unit tests for critical functions
 4. **Documentation**: Update docs with changes
-
-### Communication
-- Use issue tracking for bugs/features
-- Regular team meetings for progress updates
-- Code comments for complex logic
-- README updates for setup changes
-
-## Troubleshooting
-
-### Quick Fixes
-1. **Reset Database**: Drop and recreate tables
-2. **Clear Cache**: Remove processed data files
-3. **Restart Services**: Restart MySQL and Flask
-4. **Check Logs**: Review console output for errors
-
-### Support
-- Check documentation first
-- Review error messages carefully
-- Test individual components
-- Contact team lead for complex issues
-
 ---
-
-**Last Updated**: December 2024  
-**Version**: 1.0  
-**Owner**: Your Name
+**Owner**: Mrityunjay Bhagat

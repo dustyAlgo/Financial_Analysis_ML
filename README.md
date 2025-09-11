@@ -84,5 +84,3 @@ python main.py --web-only       # Web server only
 - Verify API key and network connectivity
 - Ensure all dependencies installed
 - Check console output for error messages
-
-**Version**: 1.0 | **Last Updated**: December 2024 
