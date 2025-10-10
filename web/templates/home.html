@@ -1,0 +1,179 @@
+{% extends "layout.html" %}
+
+{% block title %}Financial Dashboard - Company Analysis{% endblock %}
+
+{% block content %}
+
+<!-- Header Section -->
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="card-box">
+      <h1 class="display-4 text-primary mb-3">📊 Financial Analysis Dashboard</h1>
+      <p class="lead">AI-powered insights for {{ total_companies }} companies using Machine Learning</p>
+      
+      {% if show_insights %}
+        <div class="alert alert-success">
+          <strong>✅ ML Insights Available!</strong> Analysis completed for {{ processed_count }} companies.
+        </div>
+      {% else %}
+        <div class="alert alert-warning">
+          <strong>⏳ ML Insights Coming Soon</strong> Currently analyzed: {{ processed_count }} companies. 
+          Insights will be available after analyzing 70+ companies.
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Stats Row -->
+<div class="row mb-4">
+  <div class="col-md-4">
+    <div class="card-box text-center">
+      <h3 class="text-primary">{{ total_companies }}</h3>
+      <p class="text-muted mb-0">Total Companies</p>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card-box text-center">
+      <h3 class="text-success">{{ processed_count }}</h3>
+      <p class="text-muted mb-0">Companies Analyzed</p>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card-box text-center">
+      <h3 class="text-info">{% if show_insights %}Active{% else %}Pending{% endif %}</h3>
+      <p class="text-muted mb-0">ML Insights Status</p>
+    </div>
+  </div>
+</div>
+
+<!-- Company List Section -->
+<div class="row">
+  <div class="col-12">
+    <div class="card-box">
+      <h2 class="section-heading">Featured Companies</h2>
+      <p class="text-muted">Click on any company to view detailed analysis and ML insights</p>
+      
+      {% if companies %}
+        <div class="row">
+          {% for company in companies %}
+          <div class="col-lg-6 col-xl-4 mb-4">
+            <div class="card h-100 border-0 shadow-sm company-card">
+              <div class="card-body">
+                <h5 class="card-title text-primary">{{ company[1] }}</h5>
+                <p class="card-text text-muted small mb-2">ID: {{ company[0] }}</p>
+                
+                <!-- Key Metrics -->
+                <div class="row mb-3">
+                  <div class="col-6">
+                    <div class="metric-box">
+                      <small class="text-muted">ROE</small>
+                      <div class="fw-bold text-success">
+                        {% if company[2] %}{{ "%.1f"|format(company[2]) }}%{% else %}N/A{% endif %}
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-6">
+                    <div class="metric-box">
+                      <small class="text-muted">Sales Growth</small>
+                      <div class="fw-bold text-info">
+                        {% if company[3] %}{{ company[3] }}{% else %}N/A{% endif %}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Pros/Cons Preview -->
+                {% if show_insights %}
+                <div class="row mb-3">
+                  <div class="col-6">
+                    <span class="badge bg-success">{{ company[5] }} Pros</span>
+                  </div>
+                  <div class="col-6">
+                    <span class="badge bg-danger">{{ company[6] }} Cons</span>
+                  </div>
+                </div>
+                {% endif %}
+                
+                <!-- Action Button -->
+                <a href="/company/{{ company[0] }}" class="btn btn-primary btn-sm w-100">
+                  {% if show_insights %}
+                    View ML Analysis
+                  {% else %}
+                    View Details
+                  {% endif %}
+                </a>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        
+        {% if total_companies > 20 %}
+        <div class="text-center mt-4">
+          <p class="text-muted">Showing 20 of {{ total_companies }} companies</p>
+          <a href="/companies" class="btn btn-outline-primary">View All Companies</a>
+        </div>
+        {% endif %}
+        
+      {% else %}
+        <div class="text-center py-5">
+          <h4 class="text-muted">No companies found</h4>
+          <p class="text-muted">Please run the analysis pipeline first.</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mt-4">
+  <div class="col-12">
+    <div class="card-box">
+      <h3 class="section-heading">Quick Actions</h3>
+      <div class="row">
+        <div class="col-md-3 mb-2">
+          <a href="/companies" class="btn btn-outline-primary w-100">Browse All Companies</a>
+        </div>
+        <div class="col-md-3 mb-2">
+          <a href="/search" class="btn btn-outline-secondary w-100">Search Companies</a>
+        </div>
+        <div class="col-md-3 mb-2">
+          <button class="btn btn-outline-info w-100" onclick="window.location.reload()">Refresh Data</button>
+        </div>
+        <div class="col-md-3 mb-2">
+          <a href="/about" class="btn btn-outline-success w-100">About This Project</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.company-card {
+  transition: transform 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.company-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important;
+}
+
+.metric-box {
+  text-align: center;
+  padding: 0.5rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+}
+
+.metric-box small {
+  font-size: 0.75rem;
+}
+
+.metric-box .fw-bold {
+  font-size: 1.1rem;
+}
+</style>
+
+{% endblock %}

@@ -68,7 +68,7 @@ python main.py --web-only       # Web server only
 
 ### Web Interface
 - Access: `http://localhost:5000`
-- ML insights visible after analyzing 100+ companies
+- ML insights visible after analyzing 70+ companies
 
 ## 📊 Features
 

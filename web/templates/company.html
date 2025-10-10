@@ -3,6 +3,37 @@
 {% block title %}{{ company[2] }} - Analysis{% endblock %}
 
 {% block content %}
+
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-4">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="/">Home</a></li>
+    <li class="breadcrumb-item"><a href="/companies">Companies</a></li>
+    <li class="breadcrumb-item active">{{ company[2] }}</li>
+  </ol>
+</nav>
+
+<!-- Company Header -->
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="card-box">
+      <div class="row align-items-center">
+        <div class="col-md-8">
+          <h1 class="section-heading mb-2">{{ company[2] }}</h1>
+          <p class="text-muted mb-1">Company ID: {{ company[0] }}</p>
+          {% if company[3] %}
+          <p class="text-muted mb-0">{{ company[3] }}</p>
+          {% endif %}
+        </div>
+        <div class="col-md-4 text-md-end">
+          {% if company[1] %}
+          <img src="{{ company[1] }}" alt="{{ company[2] }} logo" class="img-fluid" style="max-height: 60px;">
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 {% if show_insights %}
 <div class="card-box">
   <h2 class="section-heading">Analysis</h2>
@@ -58,10 +89,19 @@
 {% else %}
 <div class="alert alert-warning mt-4">
   <h4 class="alert-heading">ML Insights Not Yet Available</h4>
-  <p>ML-generated insights will be displayed here after analyzing at least 100 companies.<br>
+  <p>ML-generated insights will be displayed here after analyzing at least 70 companies.<br>
   Currently analyzed: {{ processed_count }} companies.</p>
 </div>
 {% endif %}
 
+<!-- Navigation -->
+<div class="row mt-4">
+  <div class="col-12">
+    <div class="text-center">
+      <a href="/companies" class="btn btn-outline-secondary me-2">← Back to Companies</a>
+      <a href="/" class="btn btn-outline-primary">← Back to Home</a>
+    </div>
+  </div>
+</div>
 
 {% endblock %}

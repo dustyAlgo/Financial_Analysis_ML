@@ -98,7 +98,7 @@ financial-analysis-ml/
 - **`layout.html`**: Base template with Bootstrap styling
 - **`company.html`**: Company analysis page with ML insights
 
-**Key Feature**: ML insights are only visible after analyzing 100+ companies, ensuring data quality and meaningful analysis.
+**Key Feature**: ML insights are only visible after analyzing 70+ companies, ensuring data quality and meaningful analysis.
 
 ### 3. Database Integration
 
@@ -207,7 +207,7 @@ python scripts/store_results.py
 ### Web Interface
 - Access at: `http://localhost:5000`
 - Navigate to company pages: `http://localhost:5000/company/<company_id>`
-- ML insights appear after 100+ companies analyzed
+- ML insights appear after 70+ companies analyzed
 
 ## ML Algorithm Details
 

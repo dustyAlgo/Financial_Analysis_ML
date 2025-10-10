@@ -1,0 +1,170 @@
+{% extends "layout.html" %}
+
+{% block title %}All Companies - Financial Dashboard{% endblock %}
+
+{% block content %}
+
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-4">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="/">Home</a></li>
+    <li class="breadcrumb-item active">All Companies</li>
+  </ol>
+</nav>
+
+<!-- Header -->
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="card-box">
+      <h1 class="section-heading">All Companies ({{ total_companies }})</h1>
+      <p class="text-muted">Browse through all analyzed companies and their ML insights</p>
+    </div>
+  </div>
+</div>
+
+<!-- Company Grid -->
+{% if companies %}
+<div class="row">
+  {% for company in companies %}
+  <div class="col-lg-4 col-md-6 mb-4">
+    <div class="card h-100 border-0 shadow-sm company-card">
+      <div class="card-body">
+        <h5 class="card-title text-primary">{{ company[1] }}</h5>
+        <p class="card-text text-muted small mb-2">ID: {{ company[0] }}</p>
+        
+        <!-- Key Metrics -->
+        <div class="row mb-3">
+          <div class="col-6">
+            <div class="metric-box">
+              <small class="text-muted">ROE</small>
+              <div class="fw-bold text-success">
+                {% if company[2] %}{{ "%.1f"|format(company[2]) }}%{% else %}N/A{% endif %}
+              </div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="metric-box">
+              <small class="text-muted">Sales Growth</small>
+              <div class="fw-bold text-info">
+                {% if company[3] %}{{ company[3] }}{% else %}N/A{% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Profit Growth -->
+        <div class="row mb-3">
+          <div class="col-12">
+            <div class="metric-box">
+              <small class="text-muted">Profit Growth</small>
+              <div class="fw-bold text-warning">
+                {% if company[4] %}{{ company[4] }}{% else %}N/A{% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Pros/Cons Summary -->
+        <div class="row mb-3">
+          <div class="col-6">
+            <span class="badge bg-success">{{ company[5] }} Pros</span>
+          </div>
+          <div class="col-6">
+            <span class="badge bg-danger">{{ company[6] }} Cons</span>
+          </div>
+        </div>
+        
+        <!-- Action Button -->
+        <a href="/company/{{ company[0] }}" class="btn btn-primary btn-sm w-100">
+          View Detailed Analysis
+        </a>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Pagination -->
+{% if total_pages > 1 %}
+<nav aria-label="Company pagination" class="mt-4">
+  <ul class="pagination justify-content-center">
+    {% if has_prev %}
+      <li class="page-item">
+        <a class="page-link" href="/companies?page={{ page - 1 }}">Previous</a>
+      </li>
+    {% endif %}
+    
+    {% for p in range(1, total_pages + 1) %}
+      {% if p == page %}
+        <li class="page-item active">
+          <span class="page-link">{{ p }}</span>
+        </li>
+      {% elif p <= 3 or p > total_pages - 3 or (p >= page - 2 and p <= page + 2) %}
+        <li class="page-item">
+          <a class="page-link" href="/companies?page={{ p }}">{{ p }}</a>
+        </li>
+      {% elif p == 4 or p == total_pages - 3 %}
+        <li class="page-item disabled">
+          <span class="page-link">...</span>
+        </li>
+      {% endif %}
+    {% endfor %}
+    
+    {% if has_next %}
+      <li class="page-item">
+        <a class="page-link" href="/companies?page={{ page + 1 }}">Next</a>
+      </li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
+
+<!-- Page Info -->
+<div class="text-center mt-3">
+  <p class="text-muted">
+    Showing page {{ page }} of {{ total_pages }} 
+    ({{ (page - 1) * 24 + 1 }}-{{ [page * 24, total_companies]|min }} of {{ total_companies }} companies)
+  </p>
+</div>
+
+{% else %}
+<div class="text-center py-5">
+  <h4 class="text-muted">No companies found</h4>
+  <p class="text-muted">Please run the analysis pipeline first.</p>
+  <a href="/" class="btn btn-primary">Back to Home</a>
+</div>
+{% endif %}
+
+<!-- Back to Home -->
+<div class="text-center mt-4">
+  <a href="/" class="btn btn-outline-secondary">← Back to Home</a>
+</div>
+
+<style>
+.company-card {
+  transition: transform 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.company-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important;
+}
+
+.metric-box {
+  text-align: center;
+  padding: 0.5rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+}
+
+.metric-box small {
+  font-size: 0.75rem;
+}
+
+.metric-box .fw-bold {
+  font-size: 1.1rem;
+}
+</style>
+
+{% endblock %}

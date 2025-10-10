@@ -65,16 +65,12 @@ def insert_into_prosandcons(cursor, company_id, pros, cons):
     cursor.execute("DELETE FROM prosandcons WHERE company_id = %s", (company_id,))
     
     records = []
-    record_id = 1
     for pro in pros:
-        records.append((record_id, company_id, pro, None))
-        record_id += 1
+        records.append((company_id, pro, None))
     for con in cons:
-        records.append((record_id, company_id, None, con))
-        record_id += 1
+        records.append((company_id, None, con))
 
-
-    query = "INSERT INTO prosandcons (id, company_id, pros, cons) VALUES (%s, %s, %s, %s)"
+    query = "INSERT INTO prosandcons (company_id, pros, cons) VALUES (%s, %s, %s)"
     cursor.executemany(query, records)
 
 def compute_growth(data_list, field):
@@ -116,14 +112,14 @@ def main():
             insert_into_companies(cursor, company)
             insert_into_analysis(cursor, company_id, sales_growth, profit_growth, roe)
             insert_into_prosandcons(cursor, company_id, pros, cons)
-            print(f"✅ Inserted into all tables: {company_id}")
+            print(f"Inserted into all tables: {company_id}")
         except Exception as e:
-            print(f"❌ Error processing {company_id}: {str(e)}")
+            print(f"Error processing {company_id}: {str(e)}")
             continue
 
     conn.commit()
     conn.close()
-    print("🎉 All companies inserted into MySQL.")
+    print("All companies inserted into MySQL.")
 
 if __name__ == "__main__":
     main()
