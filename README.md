@@ -4,7 +4,7 @@ A comprehensive financial analysis system using Machine Learning to analyze publ
 
 **🚀 New Features**: Enhanced web interface with company browsing, pagination, and responsive design!
 
-## 🚀 Quick Start
+##  Quick Start
 
 ### Prerequisites
 - Python 3.8+
@@ -39,7 +39,7 @@ A comprehensive financial analysis system using Machine Learning to analyze publ
    python main.py
    ```
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 financial-analysis-ml/
@@ -53,7 +53,7 @@ financial-analysis-ml/
 └── database_schema.sql        # Database schema
 ```
 
-## 🔧 Usage
+##  Usage
 
 ### Complete Pipeline
 ```bash
@@ -73,7 +73,7 @@ python main.py --web-only       # Web server only
 - **Features**: Responsive design, breadcrumb navigation, professional dashboard
 - **ML insights** visible after analyzing 70+ companies
 
-## 📊 Features
+## Features
 
 - **ML Analysis**: Financial metrics classification with Random Forest
 - **Database Storage**: MySQL integration with optimized queries
@@ -98,10 +98,6 @@ python main.py --web-only       # Web server only
 - **Performance**: Optimized database queries with pagination
 - **Accessibility**: Proper navigation and mobile support
 
-## 📚 Documentation
-
-For detailed documentation, see `PROJECT_DOCUMENTATION.md`
-
 ## 🛠️ Troubleshooting
 
 - Check MySQL connection in `config/config.py`
@@ -110,14 +106,3 @@ For detailed documentation, see `PROJECT_DOCUMENTATION.md`
 - Install Flask: `pip install flask`
 - Ensure all dependencies installed
 - Check console output for error messages
-
-## 🤝 Team Collaboration
-
-- Use feature branches for development
-- Update documentation with changes
-- Test components individually
-- Review code before merging
-
----
-
-**Version**: 1.0 | **Last Updated**: December 2024 
