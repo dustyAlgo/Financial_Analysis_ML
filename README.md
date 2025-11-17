@@ -1,16 +1,19 @@
 # Financial Analysis ML Project
 
-A comprehensive financial analysis system using Machine Learning to analyze public company financials. The system processes existing financial data, applies ML algorithms, stores results in MySQL, and displays insights through a user-friendly web interface.
+A comprehensive financial analysis system using Machine Learning to analyze public company financials. The system uses a **fully database-driven architecture** - all company and financial data is stored in MySQL, processed through ML algorithms, and displayed through a user-friendly web interface.
 
-**🚀 New Features**: Enhanced web interface with company browsing, pagination, and responsive design!
+**🚀 Key Features**: 
+- **Database-Driven Architecture**: All data stored in normalized MySQL tables
+- **Enhanced Web Interface**: Company browsing, pagination, and responsive design
+- **ML-Powered Analysis**: Automated pros/cons generation using Random Forest
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 - Python 3.8+
-- MySQL Server
+- MySQL Server (running and accessible)
 - Virtual environment (recommended)
-- Existing raw JSON data in `data/raw/` directory
+- Raw JSON data files (for initial migration)
 
 ### Installation
 
@@ -19,23 +22,41 @@ A comprehensive financial analysis system using Machine Learning to analyze publ
    python -m venv myenv
    source myenv/bin/activate  # On Windows: myenv\Scripts\activate
    pip install -r requirements.txt
-   pip install flask  # For web interface
+   pip install flask mysql-connector-python  # For web interface and database
    ```
 
 2. **Database Setup**
-   ```sql
-   CREATE DATABASE ml;
-   USE ml;
+   ```bash
+   # Create database and tables
+   mysql -u root -p < database_schema.sql
+   
+   # Or manually:
+   # CREATE DATABASE ml; (or ml_test for testing)
+   # USE ml;
+   # Run all CREATE TABLE statements from database_schema.sql
    ```
-   Run the schema from `PROJECT_DOCUMENTATION.md`
 
 3. **Configuration**
-   - Edit `config/config.py` with your MySQL credentials
-   - Ensure raw JSON data files are in `data/raw/` directory
-   - Ensure `ml_training_data.csv` exists for ML training
+   - Edit `config/config.py` with your MySQL credentials:
+     ```python
+     DB_CONFIG = {
+         "host": "localhost",
+         "port": 3306,
+         "user": "root",
+         "password": "your_password",
+         "database": "ml"  # or "ml_test" for testing
+     }
+     ```
 
-4. **Run the System**
+4. **Migrate Data to Database (One-Time)**
    ```bash
+   # Import all JSON files from data/raw/ into MySQL
+   python scripts/migrate_json_to_mysql.py
+   ```
+
+5. **Run the System**
+   ```bash
+   # Complete pipeline + web server
    python main.py
    ```
 
@@ -43,27 +64,53 @@ A comprehensive financial analysis system using Machine Learning to analyze publ
 
 ```
 financial-analysis-ml/
-├── main.py                 # Main orchestrator (updated)
-├── scripts/               # Python scripts (ML, analyze, store)
-├── web/                   # Enhanced Flask web interface
-├── config/               # Configuration files
-├── data/                 # Raw and processed data
-├── ml_pros_classifier.joblib  # Trained ML model
-├── ml_training_data.csv       # ML training data
-└── database_schema.sql        # Database schema
+├── main.py                      # Main orchestrator (database-driven)
+├── scripts/                      # Python scripts
+│   ├── migrate_json_to_mysql.py # One-time JSON to DB migration
+│   ├── train_ml_classifier.py   # ML model training
+│   ├── analyze_data.py          # ML analysis (reads from DB)
+│   └── store_results.py         # Store results (reads/writes DB)
+├── web/                         # Enhanced Flask web interface
+│   ├── app.py                   # Web server (database-driven)
+│   └── templates/                # HTML templates
+├── config/                      # Configuration files
+│   └── config.py                # MySQL connection settings
+├── data/                        # Data directories
+│   ├── raw/                     # Original JSON files (for migration)
+│   └── processed/               # ML-processed results (optional)
+├── database_schema.sql          # MySQL database schema
+├── ml_pros_classifier.joblib    # Trained ML model
+└── ml_training_data.csv         # ML training data
 ```
 
 ## 🔧 Usage
 
+### First-Time Setup
+```bash
+# 1. Migrate JSON data to database (one-time)
+python scripts/migrate_json_to_mysql.py
+
+# 2. Run complete pipeline
+python main.py
+```
+
 ### Complete Pipeline
 ```bash
-python main.py  # Runs everything + starts web server
+python main.py  # Runs ML pipeline + starts web server
 ```
 
 ### Individual Components
 ```bash
-python main.py --pipeline-only  # ML pipeline only
-python main.py --web-only       # Web server only
+# Run only ML pipeline (no web server)
+python main.py --pipeline-only
+
+# Start only web server (skip pipeline)
+python main.py --web-only
+
+# Run individual scripts
+python scripts/analyze_data.py      # Analyze companies from DB
+python scripts/store_results.py      # Store results to DB
+python scripts/train_ml_classifier.py  # Train ML model
 ```
 
 ### Web Interface (Enhanced)
@@ -104,12 +151,25 @@ For detailed documentation, see `PROJECT_DOCUMENTATION.md`
 
 ## 🛠️ Troubleshooting
 
-- Check MySQL connection in `config/config.py`
-- Ensure raw JSON data files exist in `data/raw/`
-- Verify `ml_training_data.csv` exists for ML training
-- Install Flask: `pip install flask`
-- Ensure all dependencies installed
-- Check console output for error messages
+### Database Issues
+- **"No companies found in database"**: Run migration first: `python scripts/migrate_json_to_mysql.py`
+- **"Error connecting to database"**: 
+  - Check MySQL is running: `mysql -u root -p`
+  - Verify credentials in `config/config.py`
+  - Test connection manually
+
+### Missing Files
+- **"ml_training_data.csv not found"**: Script will auto-generate or train model if missing
+- **"ml_pros_classifier.joblib not found"**: Model will be auto-trained on first run
+
+### Dependencies
+- Install missing packages: `pip install flask mysql-connector-python`
+- Activate virtual environment before running scripts
+
+### General
+- Check console output for detailed error messages
+- Verify database schema is created: `SHOW TABLES;` in MySQL
+- See `RUN_INSTRUCTIONS.md` for detailed setup guide
 
 ## 🤝 Team Collaboration
 
@@ -120,4 +180,25 @@ For detailed documentation, see `PROJECT_DOCUMENTATION.md`
 
 ---
 
-**Version**: 1.0 | **Last Updated**: December 2024 
+## 🗄️ Database Architecture
+
+This project uses a **fully normalized MySQL database** as the single source of truth:
+
+- **Input Data**: All company and financial data stored in normalized tables
+- **Processing**: ML pipeline reads directly from database
+- **Output**: Results stored back in database
+- **Web Interface**: Displays data directly from database
+
+**Key Tables:**
+- `companies` - Company metadata
+- `cashflow` - Cash flow statements (by year)
+- `balancesheet` - Balance sheets (by year)
+- `profitandloss` - P&L statements (by year)
+- `analysis` - ML-generated analysis results
+- `prosandcons` - ML-generated pros/cons
+
+See `database_schema.sql` for complete schema.
+
+---
+
+**Version**: 2.0 (Database-Driven) | **Last Updated**: December 2024 

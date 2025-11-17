@@ -2,24 +2,34 @@
 
 ## Project Overview
 
-This project implements a comprehensive financial analysis system using Machine Learning to analyze public company financials. The system processes existing financial data, applies ML algorithms to generate insights, stores results in MySQL, and displays them through a user-friendly web interface.
+This project implements a comprehensive financial analysis system using Machine Learning to analyze public company financials. The system uses a **fully database-driven architecture** - all company and financial data is stored in normalized MySQL tables, processed through ML algorithms, and displayed through a user-friendly web interface.
 
-**Note**: This version has been restructured to work with existing data without API fetching, focusing on ML analysis and user-friendly web presentation.
+**Key Architecture Change**: This version has been refactored to use MySQL as the single source of truth. All data input, processing, and output operations are database-driven, eliminating dependency on JSON file reading during normal operations.
 
 ## System Architecture
 
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Raw Data      │    │   ML Pipeline   │    │   Web Interface │
-│   (JSON Files)  │───▶│   (Python)      │───▶│   (Flask)       │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-                              │
-                              ▼
-                       ┌─────────────────┐
-                       │   MySQL DB      │
-                       │   (Storage)     │
-                       └─────────────────┘
+┌─────────────────────────────────────────────────┐
+│            MySQL Database                       │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐     │
+│  │companies │  │cashflow  │  │balances  │     │
+│  │balances  │  │profitloss│  │analysis  │     │
+│  │proscons  │  └──────────┘  └──────────┘     │
+└────────┬────────────────────────────────────────┘
+         │
+         ├─────────────────┬─────────────────┐
+         ▼                 ▼                 ▼
+┌─────────────────┐ ┌──────────────┐ ┌──────────────┐
+│  ML Pipeline    │ │ Store Results│ │ Web Interface│
+│  (analyze_data) │ │ (store_results)│ │  (app.py)   │
+│  Reads from DB  │ │ Writes to DB │ │ Reads from DB│
+└─────────────────┘ └──────────────┘ └──────────────┘
 ```
+
+**Data Flow:**
+1. **Initial Setup**: JSON files → Migration script → MySQL database
+2. **Normal Operations**: MySQL database ↔ ML Pipeline ↔ MySQL database
+3. **Web Display**: MySQL database → Web Interface → User
 
 ## Project Structure
 
@@ -53,12 +63,13 @@ financial-analysis-ml/
 ### 1. Python Scripts: ML Pipeline (Updated)
 
 #### `main.py` - Main Orchestrator
-- **Purpose**: Coordinates the ML pipeline without data fetching
+- **Purpose**: Coordinates the ML pipeline with database-driven data
 - **Features**: 
+  - Checks database for company data availability
   - Runs ML training, analysis, and storage
   - Starts web server after pipeline completion
-  - Command-line options for different modes
-  - Checks data availability before processing
+  - Command-line options for different modes (`--pipeline-only`, `--web-only`)
+  - Validates database connection and data before processing
 
 #### `scripts/train_ml_classifier.py` - ML Training
 - **Purpose**: Trains machine learning classifier
@@ -69,34 +80,49 @@ financial-analysis-ml/
   - Saves trained model as `ml_pros_classifier.joblib`
   - Provides classification performance metrics
 
-#### `scripts/analyze_data.py` - ML Analysis
-- **Purpose**: Applies ML to generate insights
+#### `scripts/migrate_json_to_mysql.py` - Data Migration
+- **Purpose**: One-time migration of JSON files to MySQL database
 - **Features**:
-  - Extracts financial features from raw JSON data
+  - Reads all JSON files from `data/raw/` directory
+  - Parses and normalizes company, financial, and analysis data
+  - Inserts data into normalized MySQL tables
+  - Handles errors gracefully with detailed logging
+  - Supports resuming if migration fails partway
+
+#### `scripts/analyze_data.py` - ML Analysis (Database-Driven)
+- **Purpose**: Applies ML to generate insights from database data
+- **Features**:
+  - **Reads company and financial data directly from MySQL**
+  - Extracts financial features from database records
   - Applies trained ML model for predictions
   - Generates pros/cons analysis using ML predictions
-  - Saves processed data to `data/processed/`
+  - Saves processed data to `data/processed/` (optional, for compatibility)
   - Supports feature extraction for training data generation
+  - Queries all companies from database instead of file system
 
-#### `scripts/store_results.py` - Database Storage
-- **Purpose**: Stores analysis results in MySQL
+#### `scripts/store_results.py` - Database Storage (Database-Driven)
+- **Purpose**: Stores analysis results in MySQL using database data
 - **Features**:
-  - Connects to MySQL database
-  - Inserts company data, analysis results, and pros/cons
+  - **Reads company and financial data from MySQL** (not JSON files)
+  - Reads processed pros/cons from `data/processed/` files
+  - Inserts/updates company data, analysis results, and pros/cons
   - Handles AUTO_INCREMENT primary keys properly
   - Supports data updates and duplicates
-  - Calculates growth metrics from historical data
+  - Calculates growth metrics from database historical data
+  - Uses efficient database queries for data retrieval
 
 ### 2. Web Interface (Enhanced)
 
-#### `web/app.py` - Flask Application
-- **Purpose**: User-friendly web server for displaying insights
+#### `web/app.py` - Flask Application (Database-Driven)
+- **Purpose**: User-friendly web server for displaying insights from database
 - **Features**:
-  - Multiple routes for different pages
-  - Database integration with optimized queries
+  - **All data fetched directly from MySQL database**
+  - Multiple routes for different pages (home, companies, company details)
+  - Database integration with optimized queries and JOINs
   - Pagination support for large datasets
   - Responsive design with Bootstrap 5
-  - Company listing and search functionality
+  - Company listing with database-driven counts
+  - No dependency on file system for data display
 
 #### Templates (Updated)
 - **`layout.html`**: Base template with responsive navigation
@@ -112,52 +138,34 @@ financial-analysis-ml/
 
 ### 3. Database Integration
 
-#### MySQL Schema
-```sql
--- Companies table
-CREATE TABLE companies (
-    id VARCHAR(50) PRIMARY KEY,
-    company_logo TEXT,
-    company_name VARCHAR(255),
-    chart_link TEXT,
-    about_company TEXT,
-    website VARCHAR(255),
-    nse_profile VARCHAR(255),
-    bse_profile VARCHAR(255),
-    face_value DECIMAL(10,2),
-    book_value DECIMAL(10,2),
-    roce_percentage DECIMAL(5,2),
-    roe_percentage DECIMAL(5,2)
-);
+#### MySQL Schema (Normalized)
 
--- Analysis results
-CREATE TABLE analysis (
-    id VARCHAR(50) PRIMARY KEY,
-    company_id VARCHAR(50),
-    compounded_sales_growth VARCHAR(20),
-    compounded_profit_growth VARCHAR(20),
-    stock_price_cagr VARCHAR(20),
-    roe VARCHAR(20),
-    FOREIGN KEY (company_id) REFERENCES companies(id)
-);
+The database uses a fully normalized schema with the following tables:
 
--- ML-generated pros and cons
-CREATE TABLE prosandcons (
-    id INT PRIMARY KEY,
-    company_id VARCHAR(50),
-    pros TEXT,
-    cons TEXT,
-    FOREIGN KEY (company_id) REFERENCES companies(id)
-);
-```
+**Core Tables:**
+- `companies` - Company metadata and basic information
+- `cashflow` - Cash flow statements (one row per company per year)
+- `balancesheet` - Balance sheets (one row per company per year)
+- `profitandloss` - Profit & Loss statements (one row per company per year)
+- `analysis` - ML-generated analysis results
+- `prosandcons` - ML-generated pros and cons
+
+**Key Features:**
+- Normalized structure eliminates data redundancy
+- Foreign key relationships ensure data integrity
+- Indexed for optimal query performance
+- Supports historical data tracking (multiple years per company)
+
+**Complete Schema:**
+See `database_schema.sql` for the full CREATE TABLE statements with all fields, indexes, and constraints.
 
 ## Setup Instructions
 
 ### Prerequisites
 1. Python 3.8+
-2. MySQL Server
+2. MySQL Server (running and accessible)
 3. Virtual environment (recommended)
-4. Existing raw JSON data in `data/raw/` directory
+4. Raw JSON data files in `data/raw/` directory (for initial migration)
 
 ### Installation
 
@@ -168,23 +176,44 @@ CREATE TABLE prosandcons (
    python -m venv myenv
    source myenv/bin/activate  # On Windows: myenv\Scripts\activate
    pip install -r requirements.txt
-   pip install flask  # Additional dependency for web interface
+   pip install flask mysql-connector-python  # Web interface and database
    ```
 
 2. **Database Setup**
-   ```sql
-   CREATE DATABASE ml;
-   USE ml;
-   -- Run the schema creation scripts above
+   ```bash
+   # Option 1: Using command line
+   mysql -u root -p < database_schema.sql
+   
+   # Option 2: Using MySQL Workbench
+   # Open database_schema.sql and execute all statements
+   
+   # Option 3: Manual setup
+   # CREATE DATABASE ml; (or ml_test for testing)
+   # USE ml;
+   # Copy and run all CREATE TABLE statements from database_schema.sql
    ```
 
 3. **Configuration**
-   - Edit `config/config.py` with your MySQL credentials
-   - Ensure raw JSON data files are in `data/raw/` directory
-   - Ensure `ml_training_data.csv` exists for ML training
+   - Edit `config/config.py` with your MySQL credentials:
+     ```python
+     DB_CONFIG = {
+         "host": "localhost",
+         "port": 3306,
+         "user": "root",
+         "password": "your_password",
+         "database": "ml"  # or "ml_test" for testing
+     }
+     ```
 
-4. **Run the Pipeline**
+4. **Migrate Data to Database (One-Time)**
    ```bash
+   # Import all JSON files from data/raw/ into MySQL
+   python scripts/migrate_json_to_mysql.py
+   ```
+
+5. **Run the Pipeline**
+   ```bash
+   # Complete pipeline + web server
    python main.py
    ```
 

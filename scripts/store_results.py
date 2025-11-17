@@ -8,19 +8,12 @@ import mysql.connector
 from mysql.connector import Error
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from config import config
+from config.config import DB_CONFIG
 
-RAW_PATH = "data/raw"
 PROCESSED_PATH = "data/processed"
 
 def connect_to_db():
-    return mysql.connector.connect(
-        host=config.DB_CONFIG["host"],
-        port=config.DB_CONFIG["port"],
-        user=config.DB_CONFIG["user"],
-        password=config.DB_CONFIG["password"],
-        database=config.DB_CONFIG["database"]
-    )
+    return mysql.connector.connect(**DB_CONFIG)
 
 def insert_into_companies(cursor, company):
     query = """
@@ -82,44 +75,93 @@ def compute_growth(data_list, field):
         return 0.0
     return ((last - first) / first) * 100
 
+def fetch_company_from_db(cursor, company_id):
+    """Fetch company data from database"""
+    cursor.execute("SELECT * FROM companies WHERE id = %s", (company_id,))
+    row = cursor.fetchone()
+    return row  # Already a dictionary when using dictionary=True cursor
+
+def fetch_profitandloss_from_db(cursor, company_id):
+    """Fetch profit and loss data from database, ordered by year"""
+    cursor.execute("""
+        SELECT * FROM profitandloss 
+        WHERE company_id = %s 
+        ORDER BY year
+    """, (company_id,))
+    rows = cursor.fetchall()
+    return rows if rows else []  # Already a list of dictionaries when using dictionary=True cursor
+
 def main():
     conn = connect_to_db()
-    cursor = conn.cursor()
+    cursor = conn.cursor(dictionary=True)
 
-    for file in os.listdir(PROCESSED_PATH):
-        if not file.endswith(".json"):
-            continue
+    # Get list of processed files (pros/cons from analyze_data.py output)
+    if not os.path.exists(PROCESSED_PATH):
+        print(f"Error: {PROCESSED_PATH} directory not found!")
+        return
+    
+    processed_files = [f for f in os.listdir(PROCESSED_PATH) if f.endswith(".json")]
+    
+    if not processed_files:
+        print("No processed files found. Run analyze_data.py first.")
+        return
 
-        company_id = file.replace(".json", "")
-        processed_file = os.path.join(PROCESSED_PATH, file)
-        raw_file = os.path.join(RAW_PATH, f"{company_id}.json")
-
-        with open(processed_file, "r", encoding="utf-8") as pf, open(raw_file, "r", encoding="utf-8") as rf:
-            processed_data = json.load(pf)
-            raw_data = json.load(rf)
-
-        company = raw_data["company"]
-        pros = processed_data.get("pros", [])
-        cons = processed_data.get("cons", [])
-        roe_percentage = company.get("roe_percentage")
-        roe = float(roe_percentage) if roe_percentage is not None else 0.0
-
-        pl = raw_data["data"].get("profitandloss", [])[-6:]
-        sales_growth = compute_growth(pl, "sales")
-        profit_growth = compute_growth(pl, "net_profit")
+    for filename in processed_files:
+        company_id = filename.replace(".json", "")
+        processed_file = os.path.join(PROCESSED_PATH, filename)
 
         try:
+            # Read pros/cons from processed JSON file
+            with open(processed_file, "r", encoding="utf-8") as pf:
+                processed_data = json.load(pf)
+            
+            pros = processed_data.get("pros", [])
+            cons = processed_data.get("cons", [])
+            
+            # Fetch company data from database
+            company = fetch_company_from_db(cursor, company_id)
+            if not company:
+                print(f"⚠️ Skipping {company_id}: not found in database")
+                continue
+            
+            # Fetch profit and loss data from database
+            pl_data = fetch_profitandloss_from_db(cursor, company_id)
+            if not pl_data:
+                print(f"⚠️ Skipping {company_id}: no profit/loss data in database")
+                continue
+            
+            # Calculate metrics
+            roe_percentage = company.get("roe_percentage")
+            try:
+                roe = float(roe_percentage) if roe_percentage is not None and str(roe_percentage).strip() else 0.0
+            except (ValueError, TypeError):
+                roe = 0.0
+            
+            # Get last 6 years of profit/loss data for growth calculation
+            pl = pl_data[-6:] if len(pl_data) >= 6 else pl_data
+            sales_growth = compute_growth(pl, "sales")
+            profit_growth = compute_growth(pl, "net_profit")
+
+            # Insert/update data
             insert_into_companies(cursor, company)
             insert_into_analysis(cursor, company_id, sales_growth, profit_growth, roe)
             insert_into_prosandcons(cursor, company_id, pros, cons)
-            print(f"Inserted into all tables: {company_id}")
+            print(f"✅ Inserted into all tables: {company_id}")
+            
+        except FileNotFoundError:
+            print(f"⚠️ Skipping {company_id}: processed file not found")
+            continue
+        except json.JSONDecodeError as e:
+            print(f"⚠️ Skipping {company_id}: invalid JSON in processed file - {e}")
+            continue
         except Exception as e:
-            print(f"Error processing {company_id}: {str(e)}")
+            print(f"❌ Error processing {company_id}: {str(e)}")
             continue
 
     conn.commit()
+    cursor.close()
     conn.close()
-    print("All companies inserted into MySQL.")
+    print("✅ All companies inserted into MySQL.")
 
 if __name__ == "__main__":
     main()

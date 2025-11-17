@@ -3,9 +3,9 @@
 Financial Analysis ML Pipeline - Main Orchestrator
 ==================================================
 
-This script orchestrates the ML pipeline using existing data:
+This script orchestrates the ML pipeline using database-driven data:
 1. Train ML classifier (if needed)
-2. Analyze existing data with ML
+2. Analyze existing data with ML (from MySQL database)
 3. Store results in MySQL database
 4. Display insights via web interface
 
@@ -13,9 +13,9 @@ Usage:
     python main.py
 
 Requirements:
-    - MySQL database running with 'ml' database created
-    - Raw JSON data in data/raw/ directory
-    - ML training data CSV file
+    - MySQL database running with database schema created
+    - Company and financial data loaded in MySQL tables
+    - ML training data CSV file (optional, for training new models)
 """
 
 import os
@@ -28,29 +28,56 @@ project_root = Path(__file__).parent
 sys.path.append(str(project_root))
 
 def check_data_availability():
-    """Check if required data files are available"""
+    """Check if required data is available in database"""
     print("Checking data availability...")
     
-    # Check raw data
-    raw_data_path = Path("data/raw")
-    if not raw_data_path.exists():
-        print("Error: data/raw directory not found!")
+    try:
+        import mysql.connector
+        from config.config import DB_CONFIG
+        
+        # Check database connection and data
+        conn = mysql.connector.connect(**DB_CONFIG)
+        cursor = conn.cursor()
+        
+        # Check if companies table exists and has data
+        cursor.execute("SELECT COUNT(*) FROM companies")
+        company_count = cursor.fetchone()[0]
+        
+        if company_count == 0:
+            print("Error: No companies found in database!")
+            print("Please run the migration script first: python scripts/migrate_json_to_mysql.py")
+            cursor.close()
+            conn.close()
+            return False
+        
+        print(f"✅ Found {company_count} companies in database")
+        
+        # Check if financial data exists
+        cursor.execute("SELECT COUNT(DISTINCT company_id) FROM profitandloss")
+        pl_count = cursor.fetchone()[0]
+        print(f"✅ Found profit/loss data for {pl_count} companies")
+        
+        cursor.close()
+        conn.close()
+        
+    except mysql.connector.Error as e:
+        print(f"Error connecting to database: {e}")
+        print("Please ensure MySQL is running and database is configured correctly")
+        return False
+    except ImportError as e:
+        print(f"Error importing required modules: {e}")
+        return False
+    except Exception as e:
+        print(f"Unexpected error checking database: {e}")
         return False
     
-    raw_files = list(raw_data_path.glob("*.json"))
-    if not raw_files:
-        print("Error: No JSON files found in data/raw/")
-        return False
-    
-    print(f"Found {len(raw_files)} raw data files")
-    
-    # Check ML training data
+    # Check ML training data (optional)
     if not Path("ml_training_data.csv").exists():
-        print("Warning: ml_training_data.csv not found - ML training may fail")
+        print("⚠️  Warning: ml_training_data.csv not found - ML training may fail")
     
-    # Check ML model
+    # Check ML model (optional - will train if missing)
     if not Path("ml_pros_classifier.joblib").exists():
-        print("Warning: ml_pros_classifier.joblib not found - will train new model")
+        print("⚠️  Warning: ml_pros_classifier.joblib not found - will train new model")
     
     return True
 
@@ -61,7 +88,7 @@ def run_pipeline():
     
     # Check data availability
     if not check_data_availability():
-        print("Pipeline cannot proceed - missing required data files")
+        print("Pipeline cannot proceed - missing required data in database")
         return False
     
     # Step 1: Train ML Model (if needed)
