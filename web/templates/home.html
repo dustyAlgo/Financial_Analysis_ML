@@ -8,16 +8,16 @@
 <div class="row mb-4">
   <div class="col-12">
     <div class="card-box">
-      <h1 class="display-4 text-primary mb-3">📊 Financial Analysis Dashboard</h1>
-      <p class="lead">AI-powered insights for {{ total_companies }} companies using Machine Learning</p>
+      <h1 class="display-4 text-primary mb-3">Financial Analysis Dashboard</h1>
+      <p class="lead">Insights for {{ total_companies }} companies using Machine Learning</p>
       
       {% if show_insights %}
         <div class="alert alert-success">
-          <strong>✅ ML Insights Available!</strong> Analysis completed for {{ processed_count }} companies.
+          <strong>ML Insights Available!</strong> Analysis completed for {{ processed_count }} companies.
         </div>
       {% else %}
         <div class="alert alert-warning">
-          <strong>⏳ ML Insights Coming Soon</strong> Currently analyzed: {{ processed_count }} companies. 
+          <strong>ML Insights Coming Soon</strong> Currently analyzed: {{ processed_count }} companies. 
           Insights will be available after analyzing 70+ companies.
         </div>
       {% endif %}
@@ -52,7 +52,7 @@
   <div class="col-12">
     <div class="card-box">
       <h2 class="section-heading">Featured Companies</h2>
-      <p class="text-muted">Click on any company to view detailed analysis and ML insights</p>
+      <p class="text-muted">Click on any company to view ML insights</p>
       
       {% if companies %}
         <div class="row">
