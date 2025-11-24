@@ -146,5 +146,35 @@ def companies():
                          has_prev=has_prev,
                          has_next=has_next)
 
+@app.route("/search")
+def search():
+    """Search companies by name"""
+    query = request.args.get('q', '').strip()
+    
+    if not query:
+        return render_template("search.html", query=None, companies=None)
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    # Search for companies matching the query
+    cursor.execute("""
+        SELECT c.id, c.company_name, c.roe_percentage, 
+               a.compounded_sales_growth, a.compounded_profit_growth,
+               COUNT(pc.pros) as pros_count,
+               COUNT(pc.cons) as cons_count
+        FROM companies c
+        LEFT JOIN analysis a ON c.id = a.company_id
+        LEFT JOIN prosandcons pc ON c.id = pc.company_id
+        WHERE c.company_name LIKE %s
+        GROUP BY c.id, c.company_name, c.roe_percentage, a.compounded_sales_growth, a.compounded_profit_growth
+        ORDER BY c.company_name
+    """, (f"%{query}%",))
+    
+    companies = cursor.fetchall()
+    conn.close()
+    
+    return render_template("search.html", query=query, companies=companies)
+
 if __name__ == "__main__":
     app.run(debug=True)

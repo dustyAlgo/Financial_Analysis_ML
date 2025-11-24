@@ -117,8 +117,9 @@ financial-analysis-ml/
 - **Purpose**: User-friendly web server for displaying insights from database
 - **Features**:
   - **All data fetched directly from MySQL database**
-  - Multiple routes for different pages (home, companies, company details)
+  - Multiple routes for different pages (home, companies, company details, **search**)
   - Database integration with optimized queries and JOINs
+  - **Search functionality with company name matching**
   - Pagination support for large datasets
   - Responsive design with Bootstrap 5
   - Company listing with database-driven counts
@@ -129,10 +130,12 @@ financial-analysis-ml/
 - **`home.html`**: Homepage with company grid and dashboard stats
 - **`companies.html`**: Full company listing with pagination
 - **`company.html`**: Enhanced company analysis page with navigation
+- **`search.html`**: **New search interface with results display**
 
 **Key Features**: 
 - ML insights are visible after analyzing 70+ companies
 - User-friendly navigation with breadcrumbs
+- **Search functionality for finding specific companies**
 - Responsive design for mobile and desktop
 - Professional dashboard appearance
 
@@ -250,8 +253,26 @@ python scripts/store_results.py
 - **Homepage**: `http://localhost:5000` - Company grid with dashboard stats
 - **All Companies**: `http://localhost:5000/companies` - Full company listing with pagination
 - **Company Details**: `http://localhost:5000/company/<company_id>` - Detailed analysis
-- **Features**: Responsive design, breadcrumb navigation, professional dashboard
+- **Search**: `http://localhost:5000/search` - **Search companies by name**
+- **Features**: Responsive design, breadcrumb navigation, professional dashboard, **search functionality**
 - **ML insights** appear after 70+ companies analyzed
+
+### 4. Search Functionality (New)
+
+#### Search Implementation
+- **Route**: `/search` - Handles search queries and results
+- **Features**:
+  - **Company name search** using SQL LIKE operator for partial matching
+  - **Empty search state** shows clean search interface
+  - **No results messaging** when no matches found
+  - **Consistent styling** with rest of application
+  - **Database-driven** results from MySQL queries
+
+#### Technical Details
+- Uses parameterized queries for security
+- Implements case-insensitive search through database collation
+- Returns same company card format as homepage for consistency
+- Supports search from navigation and quick actions
 
 ## ML Algorithm Details
 
@@ -331,6 +352,7 @@ python scripts/store_results.py
 3. **User Authentication**: Multi-user support
 4. **API Endpoints**: RESTful API for external access
 5. **Dashboard**: Interactive charts and graphs
+6. **Advanced Search**: **Filter by financial metrics, industry, etc.**
 
 ### Technical Improvements
 1. **Microservices**: Separate services for different components
@@ -368,6 +390,6 @@ python scripts/store_results.py
 
 ---
 
-**Last Updated**: December 2024  
-**Version**: 1.0  
+**Last Updated**: January 2025  
+**Version**: 1.1  **# Updated from 1.0 to reflect new feature**
 **Owner**: Your Name
