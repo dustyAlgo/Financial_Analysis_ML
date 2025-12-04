@@ -1,7 +1,9 @@
 from flask import Flask, render_template, request
 import mysql.connector
 import sys, os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if BASE_DIR not in sys.path:
+    sys.path.insert(0, BASE_DIR)
 from config.config import DB_CONFIG
 
 app = Flask(__name__)
