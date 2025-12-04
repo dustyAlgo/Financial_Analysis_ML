@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 
-{% block title %}{{ company[2] }} - Analysis{% endblock %}
+{% block title %}{{ company.company_name }} - Analysis{% endblock %}
 
 {% block content %}
 
@@ -9,7 +9,7 @@
   <ol class="breadcrumb">
     <li class="breadcrumb-item"><a href="/">Home</a></li>
     <li class="breadcrumb-item"><a href="/companies">Companies</a></li>
-    <li class="breadcrumb-item active">{{ company[2] }}</li>
+    <li class="breadcrumb-item active">{{ company.company_name }}</li>
   </ol>
 </nav>
 
@@ -19,78 +19,72 @@
     <div class="card-box">
       <div class="row align-items-center">
         <div class="col-md-8">
-          <h1 class="section-heading mb-2">{{ company[2] }}</h1>
-          <p class="text-muted mb-1">Company ID: {{ company[0] }}</p>
-          {% if company[3] %}
-          <p class="text-muted mb-0">{{ company[3] }}</p>
+          <h1 class="section-heading mb-2">{{ company.company_name }}</h1>
+          <p class="text-muted mb-1">Company ID: {{ company.id }}</p>
+          {% if company.about_company %}
+          <p class="text-muted mb-0">{{ company.about_company }}</p>
           {% endif %}
         </div>
         <div class="col-md-4 text-md-end">
-          {% if company[1] %}
-          <img src="{{ company[1] }}" alt="{{ company[2] }} logo" class="img-fluid" style="max-height: 60px;">
+          {% if company.company_logo %}
+          <img src="{{ company.company_logo }}" alt="{{ company.company_name }} logo" class="img-fluid" style="max-height: 60px;">
           {% endif %}
         </div>
-      </div>
-    </div>
-  </div>
-</div>
-{% if show_insights %}
-<div class="card-box">
-  <h2 class="section-heading">Analysis</h2>
-  <p class="text-muted"># Analysis Generated Using ML</p>
-  <div class="row">
-    <div class="col-md-4">
-      <div class="border rounded p-3 mb-3">
-        <strong class="text-primary">Compounded Sales Growth</strong><br>
-        3 Years: {{ analysis[2] }}<br>
-        5 Years: —<br>
-        10 Years: —
-      </div>
-    </div>
-    <div class="col-md-4">
-      <div class="border rounded p-3 mb-3">
-        <strong class="text-primary">Compounded Profit Growth</strong><br>
-        3 Years: {{ analysis[3] }}<br>
-        5 Years: —<br>
-        10 Years: —
-      </div>
-    </div>
-    <div class="col-md-4">
-      <div class="border rounded p-3 mb-3">
-        <strong class="text-primary">Return on Equity</strong><br>
-        3 Years: {{ analysis[5] }}<br>
-        5 Years: —<br>
-        10 Years: —
       </div>
     </div>
   </div>
 </div>
 
-<div class="card-box">
-  <h3 class="section-heading">Pros and Cons</h3>
-  <p class="text-muted"><span class="dot"></span> Generated Using Machine Learning</p>
+<!-- Company Details -->
+<div class="card-box mb-4">
+  <h3 class="section-heading">Company Details</h3>
   <div class="row">
     <div class="col-md-6">
+      <p><strong>Face Value:</strong> {{ company.face_value if company.face_value else '—' }}</p>
+      <p><strong>Book Value:</strong> {{ company.book_value if company.book_value else '—' }}</p>
+      <p><strong>ROCE:</strong> {{ company.roce_percentage if company.roce_percentage else '—' }}%</p>
+    </div>
+    <div class="col-md-6">
+      <p><strong>ROE:</strong> {{ company.roe_percentage if company.roe_percentage else '—' }}%</p>
+      {% if company.website %}
+      <p><strong>Website:</strong> <a href="{{ company.website }}" target="_blank">{{ company.website }}</a></p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Pros and Cons Section -->
+{% if pros or cons %}
+<div class="card-box">
+  <h3 class="section-heading">ML-Generated Insights</h3>
+  <p class="text-muted"><span class="dot"></span> Generated Using Machine Learning</p>
+  <div class="row">
+    {% if pros %}
+    <div class="col-md-6">
       <div class="pros-box">
+        <h4 class="text-success">Pros</h4>
         {% for pro in pros %}
           <p>{{ pro }}</p>
         {% endfor %}
       </div>
     </div>
+    {% endif %}
+    {% if cons %}
     <div class="col-md-6">
       <div class="cons-box">
+        <h4 class="text-danger">Cons</h4>
         {% for con in cons %}
           <p>{{ con }}</p>
         {% endfor %}
       </div>
     </div>
+    {% endif %}
   </div>
 </div>
 {% else %}
-<div class="alert alert-warning mt-4">
-  <h4 class="alert-heading">ML Insights Not Yet Available</h4>
-  <p>ML-generated insights will be displayed here after analyzing at least 70 companies.<br>
-  Currently analyzed: {{ processed_count }} companies.</p>
+<div class="alert alert-info mt-4">
+  <h4 class="alert-heading">No ML Insights Available</h4>
+  <p>ML-generated insights are not available for this company yet.</p>
 </div>
 {% endif %}
 
