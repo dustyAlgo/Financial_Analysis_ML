@@ -67,6 +67,7 @@ financial-analysis-ml/
 ├── main.py                      # Main orchestrator (database-driven)
 ├── scripts/                      # Python scripts
 │   ├── migrate_json_to_mysql.py # One-time JSON to DB migration
+│   ├── generate_training_data.py # NEW: Training data generation
 │   ├── train_ml_classifier.py   # ML model training
 │   ├── analyze_data.py          # ML analysis (reads from DB)
 │   └── store_results.py         # Store results (reads/writes DB)
@@ -108,9 +109,10 @@ python main.py --pipeline-only
 python main.py --web-only
 
 # Run individual scripts
-python scripts/analyze_data.py      # Analyze companies from DB
-python scripts/store_results.py      # Store results to DB
-python scripts/train_ml_classifier.py  # Train ML model
+python scripts/generate_training_data.py  # Generate training data from DB
+python scripts/analyze_data.py           # Analyze companies from DB
+python scripts/store_results.py          # Store results to DB
+python scripts/train_ml_classifier.py    # Train ML model
 ```
 
 ### Web Interface (Enhanced)
@@ -159,7 +161,7 @@ For detailed documentation, see `PROJECT_DOCUMENTATION.md`
   - Test connection manually
 
 ### Missing Files
-- **"ml_training_data.csv not found"**: Script will auto-generate or train model if missing
+- **"ml_training_data.csv not found"**: Run `python scripts/generate_training_data.py` or script will auto-generate
 - **"ml_pros_classifier.joblib not found"**: Model will be auto-trained on first run
 
 ### Dependencies
@@ -201,4 +203,4 @@ See `database_schema.sql` for complete schema.
 
 ---
 
-**Version**: 2.0 (Database-Driven) | **Last Updated**: December 2024 
+**Version**: 2.1 (Database-Driven) | **Last Updated**: December 2025

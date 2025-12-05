@@ -28,8 +28,10 @@ This project implements a comprehensive financial analysis system using Machine 
 
 **Data Flow:**
 1. **Initial Setup**: JSON files → Migration script → MySQL database
-2. **Normal Operations**: MySQL database ↔ ML Pipeline ↔ MySQL database
-3. **Web Display**: MySQL database → Web Interface → User
+2. **Training Data**: MySQL database → Training data generation → ml_training_data.csv
+3. **ML Training**: ml_training_data.csv → ML training → ml_pros_classifier.joblib
+4. **Analysis**: MySQL database + ML model → ML analysis → Processed data
+5. **Web Display**: MySQL database → Web Interface → User
 
 ## Project Structure
 
@@ -44,6 +46,7 @@ financial-analysis-ml/
 │   └── processed/        # ML-processed data
 ├── scripts/
 │   ├── train_ml_classifier.py  # ML model training
+│   ├── generate_training_data.py  # NEW: Training data generation from database
 │   ├── analyze_data.py   # ML analysis script
 │   └── store_results.py  # Database storage script
 ├── web/
@@ -66,6 +69,7 @@ financial-analysis-ml/
 - **Purpose**: Coordinates the ML pipeline with database-driven data
 - **Features**: 
   - Checks database for company data availability
+  - Generates training data if needed (new feature)
   - Runs ML training, analysis, and storage
   - Starts web server after pipeline completion
   - Command-line options for different modes (`--pipeline-only`, `--web-only`)
@@ -110,6 +114,15 @@ financial-analysis-ml/
   - Supports data updates and duplicates
   - Calculates growth metrics from database historical data
   - Uses efficient database queries for data retrieval
+
+#### `scripts/generate_training_data.py` - Training Data Generation
+- **Purpose**: Extracts features and labels from database for ML training
+- **Features**:
+  - Reads company financial data directly from MySQL
+  - Extracts ROE, dividend payout, sales growth, and debt ratio features
+  - Generates labels from existing pros/cons data
+  - Creates comprehensive training dataset
+  - Saves to `ml_training_data.csv` for model training
 
 ### 2. Web Interface (Enhanced)
 
@@ -214,7 +227,12 @@ See `database_schema.sql` for the full CREATE TABLE statements with all fields, 
    python scripts/migrate_json_to_mysql.py
    ```
 
-5. **Run the Pipeline**
+5. **Generate Training Data** (Optional - if ml_training_data.csv doesn't exist)
+   ```bash
+   python scripts/generate_training_data.py
+   ```
+
+6. **Run the Pipeline**
    ```bash
    # Complete pipeline + web server
    python main.py
@@ -236,8 +254,8 @@ python main.py --web-only
 
 ### Individual Scripts
 ```bash
-# Fetch data only
-python scripts/fetch_data.py
+# Generate training data from database
+python scripts/generate_training_data.py
 
 # Train ML model
 python scripts/train_ml_classifier.py
@@ -390,6 +408,6 @@ python scripts/store_results.py
 
 ---
 
-**Last Updated**: January 2025  
-**Version**: 1.1  **# Updated from 1.0 to reflect new feature**
-**Owner**: Your Name
+**Last Updated**: December 2025  
+**Version**: 1.2  **# Updated from 1.0 to reflect new feature**
+**Owner**: Mrityunjay Bhagat

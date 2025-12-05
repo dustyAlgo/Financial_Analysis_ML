@@ -146,22 +146,22 @@ def main():
             insert_into_companies(cursor, company)
             insert_into_analysis(cursor, company_id, sales_growth, profit_growth, roe)
             insert_into_prosandcons(cursor, company_id, pros, cons)
-            print(f"✅ Inserted into all tables: {company_id}")
+            print(f"Inserted into all tables: {company_id}")
             
         except FileNotFoundError:
-            print(f"⚠️ Skipping {company_id}: processed file not found")
+            print(f"Skipping {company_id}: processed file not found")
             continue
         except json.JSONDecodeError as e:
-            print(f"⚠️ Skipping {company_id}: invalid JSON in processed file - {e}")
+            print(f"Skipping {company_id}: invalid JSON in processed file - {e}")
             continue
         except Exception as e:
-            print(f"❌ Error processing {company_id}: {str(e)}")
+            print(f"Error processing {company_id}: {str(e)}")
             continue
 
     conn.commit()
     cursor.close()
     conn.close()
-    print("✅ All companies inserted into MySQL.")
+    print("All companies inserted into MySQL.")
 
 if __name__ == "__main__":
     main()

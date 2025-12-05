@@ -62,14 +62,14 @@ def process_file(raw_dir, fname):
         with open(path, encoding='utf-8') as fin:
             data = json.load(fin)
     except Exception as e:
-        print(f"⚠️ Could not open or parse {fname}: {e}")
+        print(f"Could not open or parse {fname}: {e}")
         return
 
     if "company" not in data:
-        print(f"⚠️ Skipping {fname}: 'company' key not found.")
+        print(f"Skipping {fname}: 'company' key not found.")
         return
     if "data" not in data:
-        print(f"⚠️ Skipping {fname}: 'data' key not found.")
+        print(f"Skipping {fname}: 'data' key not found.")
         return
 
     company = data["company"]
@@ -117,12 +117,12 @@ def process_file(raw_dir, fname):
         )
 
         db.commit()
-        print(f"✅ Imported {fname} successfully.")
+        print(f"Imported {fname} successfully.")
 
     except Error as e:
         # If connection is lost mid-file, that file may be partial; rerun will fix thanks to
         # ON DUPLICATE KEY UPDATE + INSERT IGNORE
-        print(f"❌ Error importing {fname}: {type(e).__name__}: {e}")
+        print(f"Error importing {fname}: {type(e).__name__}: {e}")
         try:
             db.rollback()
         except Exception:
