@@ -23,8 +23,18 @@ def main():
     # Train/test split
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-    # Train model
-    clf = RandomForestClassifier(n_estimators=100, random_state=42)
+    # Train model with regularization to prevent overfitting
+    clf = RandomForestClassifier(
+        n_estimators=100,
+        max_depth=12,              # Limit tree depth - prevents overfitting
+        min_samples_split=8,       # Minimum samples required to split a node
+        min_samples_leaf=3,        # Minimum samples required in a leaf node
+        max_features=0.8,          # Use 80% of features per split - increases diversity
+        max_samples=0.8,           # Use 80% of samples per tree - increases robustness
+        bootstrap=True,            # Bootstrap sampling
+        random_state=42,           # Reproducibility
+        n_jobs=-1                  # Use all available CPU cores
+    )
     clf.fit(X_train, y_train)
 
     # Evaluate
