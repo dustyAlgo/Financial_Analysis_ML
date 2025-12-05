@@ -39,7 +39,6 @@ logs/
 
 .env
 .env.*
-config/config.py
 config/local_*.py
 
 data/raw/
